@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema de Tienda · Iniciar sesión</title>
+<style>
+  :root {
+    --fondo: #f3f5f2;
+    --tarjeta: #ffffff;
+    --tinta: #1c2a29;
+    --suave: #5b6b69;
+    --borde: #c9d3d0;
+    --acento: #1f6f78;
+    --acento-osc: #165a62;
+    --error: #b3261e;
+    --ok: #1d6b3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px;
+    background: var(--fondo); color: var(--tinta);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  main {
+    width: 100%; max-width: 400px; background: var(--tarjeta);
+    border: 1px solid var(--borde); border-radius: 10px; padding: 32px 28px;
+  }
+  h1 { margin: 0 0 4px; font-size: 1.5rem; font-weight: 650; letter-spacing: -.01em; }
+  .sub { margin: 0 0 24px; color: var(--suave); font-size: .95rem; line-height: 1.45; }
+  label { display: block; margin: 14px 0 6px; font-size: .9rem; font-weight: 600; }
+  input {
+    width: 100%; padding: 10px 12px; font: inherit; color: inherit;
+    border: 1px solid var(--borde); border-radius: 6px; background: #fff;
+  }
+  input:focus-visible, button:focus-visible, a:focus-visible {
+    outline: 3px solid #8cc7ce; outline-offset: 1px;
+  }
+  .btn {
+    width: 100%; margin-top: 20px; padding: 11px; font: inherit; font-weight: 650;
+    color: #fff; background: var(--acento); border: 0; border-radius: 6px; cursor: pointer;
+  }
+  .btn:hover { background: var(--acento-osc); }
+  .btn:disabled { opacity: .6; cursor: wait; }
+  .link {
+    display: inline-block; margin-top: 16px; padding: 0; background: none; border: 0;
+    font: inherit; font-size: .92rem; color: var(--acento); cursor: pointer; text-decoration: underline;
+  }
+  .centro { text-align: center; }
+  .aviso { min-height: 1.3em; margin: 14px 0 0; font-size: .92rem; line-height: 1.4; }
+  .aviso.error { color: var(--error); }
+  .aviso.ok { color: var(--ok); }
+  .oculto { display: none; }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- Vista 1: iniciar sesión -->
+  <section id="vista-login">
+    <h1>Iniciar sesión</h1>
+    <p class="sub">Entra con tu usuario para administrar la tienda.</p>
+
+    <form id="form-login" novalidate>
+      <label for="usuario">Usuario</label>
+      <input id="usuario" name="username" autocomplete="username" required>
+
+      <label for="password">Contraseña</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+      <button class="btn" type="submit" id="btn-login">Entrar</button>
+    </form>
+
+    <p class="aviso" id="aviso-login" role="alert"></p>
+
+    <div class="centro">
+      <button class="link" type="button" id="ir-recuperar">¿Olvidaste tu contraseña?</button>
+    </div>
+  </section>
+
+  <!-- Vista 2: recuperar contraseña -->
+  <section id="vista-recuperar" class="oculto">
+    <h1>Recuperar contraseña</h1>
+    <p class="sub">Escribe el correo de tu cuenta y te enviamos un enlace para crear una nueva contraseña.</p>
+
+    <form id="form-recuperar" novalidate>
+      <label for="correo">Correo electrónico</label>
+      <input id="correo" type="email" autocomplete="email" placeholder="nombre@correo.com" required>
+
+      <button class="btn" type="submit" id="btn-recuperar">Enviar enlace</button>
+    </form>
+
+    <p class="aviso" id="aviso-recuperar" role="alert"></p>
+
+    <div class="centro">
+      <button class="link" type="button" id="ir-login">Volver a iniciar sesión</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function mostrar(vista) {
+    $("vista-login").classList.toggle("oculto", vista !== "login");
+    $("vista-recuperar").classList.toggle("oculto", vista !== "recuperar");
+    $(vista === "login" ? "usuario" : "correo").focus();
+  }
+
+  function aviso(id, texto, tipo) {
+    const el = $(id);
+    el.textContent = texto;
+    el.className = "aviso " + (tipo || "");
+  }
+
+  $("ir-recuperar").onclick = () => mostrar("recuperar");
+  $("ir-login").onclick = () => mostrar("login");
+
+  // Iniciar sesión (usa tu endpoint POST /login)
+  $("form-login").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const usuario = $("usuario").value.trim();
+    const password = $("password").value;
+    if (!usuario || !password) {
+      aviso("aviso-login", "Escribe tu usuario y tu contraseña.", "error");
+      return;
+    }
+    $("btn-login").disabled = true;
+    aviso("aviso-login", "Verificando…");
+    try {
+      const r = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ username: usuario, password })
+      });
+      const d = await r.json();
+      if (!r.ok) {
+        aviso("aviso-login", d.detail || "No se pudo iniciar sesión.", "error");
+      } else {
+        localStorage.setItem("token", d.access_token);
+        aviso("aviso-login", "Sesión iniciada como " + d.nombre + " (" + d.tipo_usuario + ").", "ok");
+      }
+    } catch (err) {
+      aviso("aviso-login", "No hay conexión con el servidor.", "error");
+    }
+    $("btn-login").disabled = false;
+  });
+
+  // Recuperar contraseña (usa POST /recuperar-password)
+  $("form-recuperar").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = $("correo").value.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      aviso("aviso-recuperar", "Escribe un correo válido, por ejemplo nombre@correo.com.", "error");
+      return;
+    }
+    $("btn-recuperar").disabled = true;
+    aviso("aviso-recuperar", "Enviando…");
+    try {
+      const r = await fetch("/recuperar-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const d = await r.json();
+      aviso("aviso-recuperar", d.mensaje || d.detail || "Listo.", r.ok ? "ok" : "error");
+    } catch (err) {
+      aviso("aviso-recuperar", "No hay conexión con el servidor.", "error");
+    }
+    $("btn-recuperar").disabled = false;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recuperar contraseña</title>
+<body style="font-family:sans-serif;max-width:380px;margin:60px auto">
+<h2>Recuperar contraseña</h2>
+<input id="email" type="email" placeholder="Tu correo registrado" style="width:100%;padding:8px">
+<button onclick="enviar()" style="margin-top:10px;padding:8px 14px">Enviar enlace</button>
+<p id="msg"></p>
+<script>
+async function enviar(){
+  const r = await fetch('/recuperar-password',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email:document.getElementById('email').value.trim()})});
+  const d = await r.json();
+  document.getElementById('msg').textContent = d.mensaje || d.detail || 'Error';
+}
+</script></body></html>

@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Sistema de Tienda</title>
+
+
+    <!-- ========================================== -->
+    <!-- BOOTSTRAP -->
+    <!-- ========================================== -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+
+    <!-- ========================================== -->
+    <!-- CSS PROPIO -->
+    <!-- ========================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/static/estilos.css">
+
+</head>
+
+
+<body>
+
+
+<!-- ================================================== -->
+<!-- NAVBAR -->
+<!-- ================================================== -->
+
+<nav class="navbar navbar-dark bg-dark shadow">
+
+    <div class="container-fluid">
+
+        <span class="navbar-brand mb-0 h1">
+
+            🛒 Sistema de Inventario
+
+        </span>
+
+
+        <div class="d-flex gap-2">
+
+            <button
+                class="btn btn-outline-light"
+                onclick="abrirCambioPassword()">
+
+                🔑 Cambiar contraseña
+
+            </button>
+
+            <button
+                class="btn btn-outline-light"
+                onclick="localStorage.removeItem('token'); location.reload();">
+
+                Cerrar sesión
+
+            </button>
+
+        </div>
+    </div>
+
+</nav>
+
+
+
+<!-- ================================================== -->
+<!-- PANTALLA INICIAL -->
+<!-- ================================================== -->
+
+<section
+    id="inicio"
+    class="container text-center mt-5">
+
+
+    <h1 class="fw-bold">
+
+        Bienvenido al Sistema de Tienda
+
+    </h1>
+
+
+    <p class="text-muted">
+
+        Administra productos, categorías y movimientos.
+
+    </p>
+
+
+    <button
+        class="btn btn-primary me-2"
+        onclick="abrirLogin()">
+
+        Iniciar sesión
+
+    </button>
+
+
+    <button
+        class="btn btn-success"
+        onclick="abrirRegistro()">
+
+        Crear cuenta
+
+    </button>
+
+
+</section>
+
+
+
+<!-- ================================================== -->
+<!-- PANEL PRINCIPAL -->
+<!-- ================================================== -->
+
+<section
+    id="panel-principal"
+    class="container-fluid mt-4 px-4"
+    style="display:none;">
+
+
+   <!-- ================================================== -->
+    <!-- TIENDA: CATÁLOGO Y CARRITO -->
+    <!-- ================================================== -->
+
+    <div
+        id="seccion-tienda"
+        class="row g-4 mb-4">
+
+        <div class="col-lg-7">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="fw-bold mb-1">
+                        🛍️ Tienda
+                    </h5>
+
+                    <small class="text-muted">
+                        Elige los productos que quieres comprar.
+                    </small>
+
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover mb-0 align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th>PRODUCTO</th>
+                                <th>PRECIO</th>
+                                <th>DISPONIBLES</th>
+                                <th>CANTIDAD</th>
+                                <th></th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tabla-catalogo">
+
+                            <tr>
+                                <td
+                                    colspan="5"
+                                    class="text-center text-muted">
+
+                                    Cargando productos...
+
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-5">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header bg-white">
+
+                    <h5 class="fw-bold mb-1">
+                        🛒 Tu carrito
+                    </h5>
+
+                    <small class="text-muted">
+                        Revisa tu pedido antes de confirmar.
+                    </small>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div id="carrito-items">
+
+                        <p class="text-muted">
+                            Tu carrito está vacío.
+                        </p>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span id="carrito-subtotal">$0.00</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>IVA (16%)</span>
+                        <span id="carrito-iva">$0.00</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total</span>
+                        <span id="carrito-total">$0.00</span>
+                    </div>
+
+                    <div
+                        id="mensaje-venta"
+                        class="mt-3">
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-success w-100 mt-2"
+                        onclick="confirmarPedido()">
+
+                        ✅ Confirmar pedido
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary w-100 mt-2"
+                        onclick="vaciarCarrito()">
+
+                        Vaciar carrito
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- ================================================== -->
+    <!-- BUSCADOR -->
+    <!-- ================================================== -->
+
+    <div id="seccion-buscador" class="card shadow-sm mb-4">
+
+
+        <div class="card-body">
+
+
+            <label
+                for="buscar-producto"
+                class="form-label">
+
+                Buscar producto
+
+            </label>
+
+
+            <div class="input-group">
+
+
+                <span class="input-group-text">
+
+                    🔍
+
+                </span>
+
+
+                <input
+                    type="text"
+                    id="buscar-producto"
+                    class="form-control"
+                    placeholder="Buscar producto por nombre...">
+
+            </div>
+
+
+        </div>
+
+    </div>
+<!-- ================================================== -->
+<!-- RESUMEN DEL INVENTARIO -->
+<!-- ================================================== -->
+
+<div id="seccion-resumen" class="row g-4 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h6 class="text-muted">
+                    📦 Productos
+                </h6>
+
+                <h2 id="total-productos">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h6 class="text-muted">
+                    ⚠️ Stock bajo
+                </h6>
+
+                <h2 id="total-stock-bajo">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm h-100">
+
+            <div class="card-body">
+
+                <h6 class="text-muted">
+                    🔄 Movimientos
+                </h6>
+
+                <h2 id="total-movimientos">
+                    0
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================== -->
+<!-- PRODUCTOS CON STOCK BAJO -->
+<!-- ================================================== -->
+
+<div id="seccion-stock-bajo" class="card shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <h5 class="fw-bold mb-1">
+            ⚠️ Productos con stock bajo
+        </h5>
+
+        <small class="text-muted">
+            Productos que están en su stock mínimo o por debajo.
+        </small>
+
+    </div>
+
+    <div class="card-body">
+
+        <div id="lista-stock-bajo">
+
+            <p class="text-muted">
+                Cargando...
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ================================================== -->
+<!-- REPORTES -->
+<!-- ================================================== -->
+
+<div
+    id="seccion-reportes"
+    class="card shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+
+        <h5 class="fw-bold mb-1">
+            📊 Reportes
+        </h5>
+
+        <small class="text-muted">
+            Descarga la información en el formato que prefieras.
+        </small>
+
+    </div>
+
+    <div class="card-body">
+
+        <div
+            id="reportes-ventas"
+            class="mb-3">
+
+            <strong class="me-2">Ventas:</strong>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success me-1"
+                onclick="descargarReporte('ventas', 'csv')">
+                CSV
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success me-1"
+                onclick="descargarReporte('ventas', 'xlsx')">
+                Excel
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-success"
+                onclick="descargarReporte('ventas', 'pdf')">
+                PDF
+            </button>
+
+        </div>
+
+        <div id="reportes-inventario">
+
+            <strong class="me-2">Inventario:</strong>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary me-1"
+                onclick="descargarReporte('inventario', 'csv')">
+                CSV
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary me-1"
+                onclick="descargarReporte('inventario', 'xlsx')">
+                Excel
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                onclick="descargarReporte('inventario', 'pdf')">
+                PDF
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ================================================== -->
+<!-- OPCIONES DE ADMINISTRADOR -->
+<!-- ================================================== -->
+
+<div
+    id="panel-administrador"
+    class="card shadow-sm mb-4"
+    style="width:100%;">
+
+    <div class="card-header bg-white">
+
+        <h5 class="fw-bold mb-1">
+            👑 Administración
+        </h5>
+
+        <small class="text-muted">
+            Opciones disponibles para el administrador.
+        </small>
+
+    </div>
+
+    <div class="card-body">
+
+        <button
+            type="button"
+            class="btn btn-primary me-2"
+            onclick="mostrarCategorias()">
+
+            📂 Administrar categorías
+
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-success"
+            onclick="mostrarProveedores()">
+
+            🏢 Administrar proveedores
+
+        </button>
+
+    </div>
+
+</div>
+
+
+    <!-- ================================================== -->
+    <!-- PRODUCTOS REGISTRADOS -->
+    <!-- ================================================== -->
+
+    <div id="seccion-tabla-productos" class="card shadow-sm mb-4">
+
+
+        <!-- ENCABEZADO -->
+
+        <div class="card-header bg-white">
+
+
+            <h5 class="fw-bold mb-1">
+
+                📦 Productos registrados
+
+            </h5>
+
+
+            <small class="text-muted">
+
+                Consulta y administra los productos del inventario.
+
+            </small>
+
+
+        </div>
+
+
+
+        <!-- TABLA -->
+
+        <div class="table-responsive">
+
+
+            <table class="table table-hover mb-0">
+
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>PRODUCTO</th>
+
+                        <th>CATEGORÍA</th>
+
+                        <th>PROVEEDOR</th>
+
+                        <th>PRECIO VENTA</th>
+
+                        <th>STOCK</th>
+
+                        <th id="col-acciones">ACCIONES</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tabla-productos">
+
+
+                    <!--
+
+                        JavaScript colocará aquí
+                        los productos de Neon.
+
+                    -->
+
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center text-muted">
+
+                            Cargando productos...
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ================================================== -->
+    <!-- REGISTRAR PRODUCTO + MOVIMIENTOS -->
+    <!-- ================================================== -->
+
+    <div class="row g-4 mb-4">
+
+
+
+        <!-- ============================================== -->
+        <!-- REGISTRAR PRODUCTO -->
+        <!-- ============================================== -->
+
+        <div
+             id="seccion-productos"
+             class="col-lg-7">
+
+
+            <div class="card shadow-sm h-100">
+
+
+                <!-- ENCABEZADO -->
+
+                <div class="card-header bg-white">
+
+
+                    <h5 class="fw-bold mb-1">
+
+                        ➕ Registrar producto
+
+                    </h5>
+
+
+                    <small class="text-muted">
+
+                        Agrega o modifica información del producto.
+
+                    </small>
+
+
+                </div>
+
+
+
+                <!-- FORMULARIO -->
+
+                <div class="card-body">
+
+
+                    <form id="form-producto">
+
+
+                        <!-- ID PARA EDICIÓN -->
+
+                        <input
+                            type="hidden"
+                            id="id-producto">
+
+
+
+                        <!-- ================================= -->
+                        <!-- CÓDIGO + NOMBRE -->
+                        <!-- ================================= -->
+
+                        <div class="row">
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="codigo-barras"
+                                    class="form-label">
+
+                                    Código de barras
+
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    id="codigo-barras"
+                                    class="form-control"
+                                    placeholder="Código de barras">
+
+
+                            </div>
+
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="nombre-producto"
+                                    class="form-label">
+
+                                    Nombre
+
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    id="nombre-producto"
+                                    class="form-control"
+                                    placeholder="Nombre del producto">
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- DESCRIPCIÓN -->
+                        <!-- ================================= -->
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="descripcion-producto"
+                                class="form-label">
+
+                                Descripción
+
+                            </label>
+
+
+                            <textarea
+                                id="descripcion-producto"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Descripción del producto"></textarea>
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- CATEGORÍA + PROVEEDOR -->
+                        <!-- ================================= -->
+
+                        <div class="row">
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="categoria-producto"
+                                    class="form-label">
+
+                                    Categoría
+
+                                </label>
+
+
+                                <select
+                                    id="categoria-producto"
+                                    class="form-select">
+
+
+                                    <option value="">
+
+                                        Selecciona una categoría
+
+                                    </option>
+
+
+                                </select>
+
+
+                            </div>
+
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="proveedor-producto"
+                                    class="form-label">
+
+                                    Proveedor
+
+                                </label>
+
+
+                                <select
+                                    id="proveedor-producto"
+                                    class="form-select">
+
+
+                                    <option value="">
+
+                                        Selecciona un proveedor
+
+                                    </option>
+
+
+                                </select>
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- PRECIOS -->
+                        <!-- ================================= -->
+
+                        <div class="row">
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="precio-compra"
+                                    class="form-label">
+
+                                    Precio de compra
+
+                                </label>
+
+
+                                <div class="input-group">
+
+
+                                    <span class="input-group-text">
+
+                                        $
+
+                                    </span>
+
+
+                                    <input
+                                        type="number"
+                                        id="precio-compra"
+                                        class="form-control"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0.00">
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="precio-venta"
+                                    class="form-label">
+
+                                    Precio de venta
+
+                                </label>
+
+
+                                <div class="input-group">
+
+
+                                    <span class="input-group-text">
+
+                                        $
+
+                                    </span>
+
+
+                                    <input
+                                        type="number"
+                                        id="precio-venta"
+                                        class="form-control"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="0.00">
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- STOCK -->
+                        <!-- ================================= -->
+
+                        <div class="row">
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="stock-actual"
+                                    class="form-label">
+
+                                    Stock actual
+
+                                </label>
+
+
+                                <input
+                                    type="number"
+                                    id="stock-actual"
+                                    class="form-control"
+                                    min="0"
+                                    placeholder="0">
+
+
+                            </div>
+
+
+
+                            <div class="col-md-6 mb-3">
+
+
+                                <label
+                                    for="stock-minimo"
+                                    class="form-label">
+
+                                    Stock mínimo
+
+                                </label>
+
+
+                                <input
+                                    type="number"
+                                    id="stock-minimo"
+                                    class="form-control"
+                                    min="0"
+                                    placeholder="0">
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- MENSAJE -->
+                        <!-- ================================= -->
+
+                        <div
+                            id="mensaje-producto"
+                            class="mb-3">
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- BOTONES -->
+                        <!-- ================================= -->
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            💾 Registrar producto
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            id="btn-cancelar-edicion"
+                            class="btn btn-secondary"
+                            style="display:none;"
+                            onclick="cancelarEdicion()">
+
+                            ✖ Cancelar
+
+                        </button>
+
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ============================================== -->
+        <!-- MOVIMIENTOS -->
+        <!-- ============================================== -->
+
+        <div
+             id="seccion-movimientos"
+             class="col-lg-5">
+
+
+            <div class="card shadow-sm h-100">
+
+
+                <!-- ENCABEZADO -->
+
+                <div class="card-header bg-white">
+
+
+                    <h5 class="fw-bold mb-1">
+
+                        🔄 Movimientos
+
+                    </h5>
+
+
+                    <small class="text-muted">
+
+                        Registra entradas y ajustes.
+
+                    </small>
+
+
+                </div>
+
+
+
+                <!-- FORMULARIO -->
+
+                <div class="card-body">
+
+
+                    <form id="form-movimiento">
+
+
+
+                        <!-- ================================= -->
+                        <!-- PRODUCTO -->
+                        <!-- ================================= -->
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="movimiento-producto"
+                                class="form-label">
+
+                                Producto
+
+                            </label>
+
+
+                            <select
+                                id="movimiento-producto"
+                                class="form-select">
+
+
+                                <option value="">
+
+                                    Selecciona un producto
+
+                                </option>
+
+
+                            </select>
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- TIPO DE MOVIMIENTO -->
+                        <!-- ================================= -->
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="tipo-movimiento"
+                                class="form-label">
+
+                                Tipo de movimiento
+
+                            </label>
+
+
+                            <select
+                                id="tipo-movimiento"
+                                class="form-select">
+
+
+                                <option value="">
+
+                                    Selecciona un movimiento
+
+                                </option>
+
+
+                                <option value="ENTRADA">
+
+                                    ENTRADA
+
+                                </option>
+
+
+                                <option value="SALIDA">
+
+                                    SALIDA
+
+                                </option>
+
+
+                                <option value="AJUSTE">
+
+                                    AJUSTE
+
+                                </option>
+
+
+                            </select>
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- CANTIDAD -->
+                        <!-- ================================= -->
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="cantidad-movimiento"
+                                class="form-label">
+
+                                Cantidad
+
+                            </label>
+
+
+                            <input
+                                type="number"
+                                id="cantidad-movimiento"
+                                class="form-control"
+                                min="1"
+                                placeholder="Cantidad">
+
+
+                        </div>
+
+
+
+                        <!-- ================================= -->
+                        <!-- MOTIVO -->
+                        <!-- ================================= -->
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="motivo-movimiento"
+                                class="form-label">
+
+                                Motivo
+
+                            </label>
+
+
+                            <textarea
+                                id="motivo-movimiento"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Motivo del movimiento"></textarea>
+
+
+                        </div>
+
+
+
+                        <!-- MENSAJE -->
+
+                        <div
+                            id="mensaje-movimiento"
+                            class="mb-3">
+
+                        </div>
+
+
+
+                        <!-- BOTÓN -->
+
+                        <button
+                            type="submit"
+                            class="btn btn-success w-100">
+
+                            🔄 Registrar movimiento
+
+                        </button>
+
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ================================================== -->
+    <!-- HISTORIAL DE MOVIMIENTOS -->
+    <!-- ================================================== -->
+
+    <div
+        id="seccion-historial"
+        class="card shadow-sm mb-5">
+
+
+        <!-- ENCABEZADO -->
+
+        <div class="card-header bg-white">
+
+
+            <h5 class="fw-bold mb-1">
+
+                🕘 Historial de movimientos
+
+            </h5>
+
+
+            <small class="text-muted">
+
+                Consulta los movimientos realizados en el inventario.
+
+            </small>
+
+
+        </div>
+
+
+
+        <!-- TABLA -->
+
+        <div class="table-responsive">
+
+
+            <table class="table table-hover mb-0">
+
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>PRODUCTO</th>
+
+                        <th>MOVIMIENTO</th>
+
+                        <th>CANTIDAD</th>
+
+                        <th>MOTIVO</th>
+
+                        <th>FECHA</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="tabla-historial">
+
+
+                    <tr>
+
+                        <td
+                            colspan="6"
+                            class="text-center text-muted">
+
+                            Cargando historial...
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+
+            </table>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+<!-- ================================================== -->
+<!-- SECCIÓN DE PROVEEDORES -->
+<!-- ================================================== -->
+
+<section
+    id="seccion-proveedores"
+    class="container mt-4"
+    style="display:none;">
+
+    <div class="card shadow">
+
+        <div class="card-header">
+            <h4>Proveedores</h4>
+        </div>
+
+        <div class="card-body">
+
+            <input
+                type="text"
+                id="nombre-proveedor"
+                class="form-control mb-2"
+                placeholder="Nombre de la empresa">
+
+            <input
+                type="text"
+                id="contacto-proveedor"
+                class="form-control mb-2"
+                placeholder="Nombre del contacto">
+
+            <input
+                type="text"
+                id="telefono-proveedor"
+                class="form-control mb-2"
+                placeholder="Teléfono">
+
+            <input
+                type="email"
+                id="email-proveedor"
+                class="form-control mb-2"
+                placeholder="Correo electrónico">
+
+            <input
+                type="text"
+                id="direccion-proveedor"
+                class="form-control mb-2"
+                placeholder="Dirección">
+
+            <button
+                type="button"
+                class="btn btn-success"
+                onclick="crearProveedor()">
+
+                Crear proveedor
+
+            </button>
+
+            <p id="mensaje-proveedor"></p>
+
+            <hr>
+
+            <div id="lista-proveedores"></div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================== -->
+<!-- SECCIÓN CATEGORÍAS -->
+<!-- ================================================== -->
+
+<!--
+
+    La conservamos para que tus funciones actuales
+    no se rompan.
+
+-->
+
+<section
+    id="seccion-categorias"
+    class="container mt-4"
+    style="display:none;">
+
+    <div class="card shadow">
+
+        <div class="card-header">
+
+            <h4>
+
+                Categorías
+
+            </h4>
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            <input
+                type="text"
+                id="nombre-categoria"
+                class="form-control mb-2"
+                placeholder="Nombre">
+
+
+            <input
+                type="text"
+                id="descripcion-categoria"
+                class="form-control mb-2"
+                placeholder="Descripción">
+
+
+            <button
+                class="btn btn-success"
+                onclick="crearCategoria()">
+
+                Crear categoría
+
+            </button>
+
+
+            <p id="mensaje-categoria"></p>
+
+
+            <hr>
+
+
+            <div id="lista-categorias">
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- ================================================== -->
+<!-- LOGIN -->
+<!-- ================================================== -->
+
+<div
+    id="modal-login"
+    class="modal">
+
+
+    <div class="modal-contenido">
+
+
+        <button
+            class="cerrar-modal"
+            onclick="cerrarLogin()">
+
+            ✕
+
+        </button>
+
+
+        <h2>
+
+            Iniciar sesión
+
+        </h2>
+
+
+        <input
+            type="text"
+            id="usuario"
+            placeholder="Usuario">
+
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Contraseña">
+
+
+        <button
+            class="boton-iniciar"
+            onclick="iniciarSesion()">
+
+            Entrar
+
+        </button>
+
+
+        <p id="mensaje-login"></p>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- ================================================== -->
+<!-- REGISTRO -->
+<!-- ================================================== -->
+
+<div
+    id="modal-registro"
+    class="modal">
+
+
+    <div class="modal-contenido">
+
+
+        <button
+            class="cerrar-modal"
+            onclick="cerrarRegistro()">
+
+            ✕
+
+        </button>
+
+
+        <h2>
+
+            Crear cuenta
+
+        </h2>
+
+
+        <input
+            type="text"
+            id="nombre-registro"
+            placeholder="Nombre">
+
+
+        <input
+            type="text"
+            id="usuario-registro"
+            placeholder="Usuario">
+
+
+        <input
+            type="email"
+            id="email-registro"
+            placeholder="Correo">
+
+
+        <input
+            type="password"
+            id="password-registro"
+            placeholder="Contraseña">
+
+
+        <button
+            class="boton-iniciar"
+            onclick="registrarUsuario()">
+
+            Crear cuenta
+
+        </button>
+
+
+        <p id="mensaje-registro"></p>
+
+
+    </div>
+
+</div>
+<!-- ================================================== -->
+<!-- CAMBIAR CONTRASEÑA -->
+<!-- ================================================== -->
+
+<div
+    id="modal-password"
+    class="modal">
+
+    <div class="modal-contenido">
+
+        <button
+            class="cerrar-modal"
+            onclick="cerrarCambioPassword()">
+
+            ✕
+
+        </button>
+
+        <h2>
+
+            Cambiar contraseña
+
+        </h2>
+
+        <div class="campo-password">
+
+            <input
+                type="password"
+                id="password-actual"
+                placeholder="Contraseña actual">
+
+            <button
+                type="button"
+                class="ojo-password"
+                onclick="alternarPassword('password-actual', this)">
+
+                👁️
+
+            </button>
+
+        </div>
+
+        <div
+            class="campo-password"
+            style="margin-top: 12px;">
+
+            <input
+                type="password"
+                id="password-nueva"
+                placeholder="Nueva contraseña (mínimo 6)">
+
+            <button
+                type="button"
+                class="ojo-password"
+                onclick="alternarPassword('password-nueva', this)">
+
+                👁️
+
+            </button>
+
+        </div>
+
+        <button
+            class="boton-iniciar"
+            onclick="cambiarPassword()">
+
+            Guardar
+
+        </button>
+
+        <p
+            id="mensaje-password"
+            style="text-align:center; margin-top:15px; font-weight:bold;"></p>
+
+    </div>
+
+</div>
+<!-- ================================================== -->
+<!-- JAVASCRIPT -->
+<!-- ================================================== -->
+
+<script src="/static/funciones.js?v=9"></script>
+
+
+</body>
+
+</html>
